@@ -1,0 +1,81 @@
+---
+title: "ทดสอบ Flex Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+Bangkok
+======
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Bangkok
+
+```{r}
+library(leaflet)
+library(readxl)
+library(tidyverse)
+
+WQ <- read_xlsx("WQ.xlsx", 
+                  sheet = "clone (2)")
+
+leaflet(data = WQ) %>% 
+  addTiles() %>% 
+  addCircleMarkers(lng = ~longitude , 
+             lat = ~latitude,
+             color = ~province,
+             popup = ~station)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Dissolved Oxygen , DO
+
+```{r}
+WQ <- read_xlsx("WQ.xlsx", 
+                  sheet = "clone (2)")
+
+table01 <- WQ %>%
+  group_by(province,monsoon ) %>%
+  summarise(mean(DO), 
+            sd(DO))
+
+knitr::kable(table01, 
+             col.names = c("Province",
+                           "Season",
+                           "DO (mg/l)",
+                           "SD"), 
+             digits = 2,
+             caption = "ตารางที่ 1. ค่าออกซิเจนละลายน้ำในแต่ละจังหวัด")
+
+```
+
+### Graph DO
+
+```{r}
+table01 %>%
+       ggplot(aes(x = province, y = `mean(DO)`)) + 
+  geom_col(aes(fill = monsoon),
+           position = position_dodge(0.8), 
+           width = 0.7) + 
+  geom_errorbar(aes(ymin = `mean(DO)` - `sd(DO)`,
+                    ymax = `mean(DO)` + `sd(DO)`, group = monsoon), 
+                width = 0.3, position = position_dodge(0.8)) + 
+   labs(x = "Province / จังหวัด",
+        y = "ปริมาณออกซิเจนละลายน้ำ (mg/l)"    )
+```
+
+Chon Buri
+========
+
+
+
+Samut Prakarn
+=======
